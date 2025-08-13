@@ -25,7 +25,7 @@ app.get('/login', async (req, res) => {
       if(err) {
         res.status(400);
       }
-      for(i=-1; i <= row.length; i++){
+      for(i=0; i <= row.length; i++){
         try{if(username == row[i].username && password == row[i].password){
           console.log("login")
           usercheck = true;
