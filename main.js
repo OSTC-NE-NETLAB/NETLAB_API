@@ -9,21 +9,8 @@ const crypto = import('node:crypto');
 app.use(express.json())
 
 app.get('/', (req, res) => {
-  res.send(302);
+  res.send(200);
   console.log("status request from " + req.ip + " / -> GET request");
-})
-
-app.get('/inventory', async (req, res) => {
-  console.log("inventory DB request from " + req.id + "/inventory -> GET request");
-  await db.all("SELECT * FROM inventory", (err, row) =>{
-    if (err){
-      res.status(400);
-      return;
-    }
-    res.json({
-      row,
-    })
-  });
 })
 
 app.get('/login', async (req, res) => {
@@ -38,13 +25,17 @@ app.get('/login', async (req, res) => {
       if(err) {
         res.status(400);
       }
-      for(i=0; i <= row.length; i++){
-        if(username == row[i].username && password == row[i].password){
+      for(i=-1; i <= row.length; i++){
+        try{if(username == row[i].username && password == row[i].password){
           console.log("login")
           usercheck = true;
           res.send(200)
           break;
-        }
+        }}
+        catch(err){
+          res.send(400)
+          break;
+            }
       }
     })
   }
