@@ -31,7 +31,10 @@ app.post('/login', (req, res) =>{
  let password = req.body.password;
  const user_pass = database.prepare("SELECT username, password FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
  let user_db = user_pass.all()
- console.log(user_db.)
+ if(user_db.length < 0){
+  res.send()
+ } 
+})
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
