@@ -1,11 +1,12 @@
 const express = require('express')
 const app = express()
-const port = 8080
+const toml = require('toml');
 const sqlite = require('node:sqlite');
 const { DatabaseSync } = require('node:sqlite');
 const database = new DatabaseSync('/home/lavapuppydog/repos/NETLAB_API/main.db');
 const fs = require('fs');
-
+const config = toml.parse(fs.readFileSync('./server-config.toml', 'utf-8'));
+const port = config.server_interface.port;
 //special vars
 var return_code;
 var return_body;
