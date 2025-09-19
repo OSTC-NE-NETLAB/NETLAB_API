@@ -2,4 +2,4 @@
 [server_certificates]
 
 [server_interface]
-port = "2020"
+port = "8080"

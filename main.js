@@ -3,7 +3,7 @@ const app = express()
 const toml = require('toml');
 const sqlite = require('node:sqlite');
 const { DatabaseSync } = require('node:sqlite');
-const database = new DatabaseSync('/home/lavapuppydog/repos/NETLAB_API/main.db');
+const database = new DatabaseSync(process.cwd()+'/main.db');
 const fs = require('fs');
 const config = toml.parse(fs.readFileSync('./server-config.toml', 'utf-8'));
 const port = config.server_interface.port;
@@ -53,9 +53,14 @@ app.get('/', (req, res) => {
 })
 
 //main login function
-app.post('/login', (req, res) =>{
- let username = req.body.username;
- let password = req.body.password;
+app.post('/login', async (req, res) =>{
+
+  let username = req.body.username;
+  let password = req.body.password;
+  if(username == undefined  || password == undefined){
+    password = "null"
+    username = "null"
+  }
  const user_pass = database.prepare("SELECT username, password FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
  let user_db = user_pass.all()
  if(user_db.length == 0){
