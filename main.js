@@ -62,13 +62,12 @@ app.post('/login', async (req, res) =>{
     const user_pass = database.prepare("SELECT username, password FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
      let user_db = user_pass.all()
     if(user_db.length == 0){
-      return_code = 406;
     } else{
-      return_code = 202;
-      let NewSession = await genkey();
-      database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
-      res.body('{}')
-
+      var NewSession = await genkey();
+      await database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
+      let getinfo = database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ NewSession +"';");
+      let sessioninfo = getinfo.all()
+      res.json(sessioninfo)
     }
   }else{
     res.send(402);
