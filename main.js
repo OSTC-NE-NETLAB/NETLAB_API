@@ -57,21 +57,30 @@ app.post('/login', async (req, res) =>{
 
   let username = req.body.username;
   let password = req.body.password;
-  if(username == undefined  || password == undefined){
-    password = "null"
-    username = "null"
+  if(username != undefined  && password != undefined){
+
+    const user_pass = database.prepare("SELECT username, password FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
+     let user_db = user_pass.all()
+    if(user_db.length == 0){
+      return_code = 406;
+    } else{
+      return_code = 202;
+      let NewSession = await genkey();
+      database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
+      res.body('{}')
+
+    }
+  }else{
+    res.send(402);
   }
- const user_pass = database.prepare("SELECT username, password FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
- let user_db = user_pass.all()
- if(user_db.length == 0){
-  return_code = 406;
- } else{
-  return_code = 202;
- }
- res.send(return_code);
+ 
 })
 
-//cryptography keys
+//session key generator
+async function genkey (){
+ return Math.random().toString(36).substring(2);
+  
+}
 
 
 app.listen(port, () => {
