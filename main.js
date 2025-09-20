@@ -52,28 +52,33 @@ app.get('/', (req, res) => {
   res.send(200);
 })
 
-//main login function
-app.post('/login', async (req, res) =>{
+//login functions
+app.route('/login')
+  .post(async (req, res) =>{
 
-  let username = req.body.username;
-  let password = req.body.password;
-  if(username != undefined  && password != undefined){
+    let username = req.body.username;
+    let password = req.body.password;
+    if(username != undefined  && password != undefined){
 
-    const user_pass = database.prepare("SELECT username, password FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
-     let user_db = user_pass.all()
-    if(user_db.length == 0){
-    } else{
-      var NewSession = await genkey();
-      await database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
-      let getinfo = database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ NewSession +"';");
-      let sessioninfo = getinfo.all()
-      res.json(sessioninfo)
-    }
-  }else{
-    res.send(402);
-  }
+      const user_pass = database.prepare("SELECT username, password FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
+      let user_db = user_pass.all()
+      if(user_db.length == 0){
+        res.send(402)
+      } else{
+        var NewSession = await genkey();
+        await database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
+        let getinfo = database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ NewSession +"';");
+        let sessioninfo = getinfo.all()
+        res.json(sessioninfo)
+      }
+    }else{
+      res.send(402);
+    } 
  
-})
+    })
+  .get((req, res) =>{
+
+  })
 
 //session key generator
 async function genkey (){
