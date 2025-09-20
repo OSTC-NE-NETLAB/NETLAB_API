@@ -77,7 +77,15 @@ app.route('/login')
  
     })
   .get((req, res) =>{
-
+    try{
+      res.sendFile(process.cwd() + '/html/login.html')
+    }catch(err){
+      res.send(500)
+      let log = 'Request info:' + ' Time: ' + new Date() + ' Type: ' + req.method + ' Ip:' + req.ip;
+      fs.appendFile('logs.txt', '\n' + log + ' Error Thrown: ' +  err, (error)=>{
+        if (error) throw error;}
+        
+      )}
   })
 
 //session key generator
