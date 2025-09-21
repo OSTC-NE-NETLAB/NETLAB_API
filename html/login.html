@@ -1,1 +1,43 @@
-hello world!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSTC - Login</title>
+    <link rel="stylesheet" href="/login.css">
+</head>
+<body>
+   <h1>Login</h1>
+   <title>Login</title>
+   <label for="username">username:</label><br>
+   <input type="text" name="username" id="username"><br>
+   <label for="password">password:</label><br>
+   <input type="password" name="password" id="password" >
+   <button onclick="sendForm()">Enter</button>
+        
+</body>
+<script>
+    function sendForm(){
+        let usernamein = document.getElementById('username').value;
+        let passwordin = document.getElementById('password').value;
+
+        let response = {
+            username : usernamein,
+            password : passwordin
+        }
+        fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+         },
+         body: JSON.stringify(response)
+        })
+        .then(response => response.json())
+        .then(data => console.log('Success:', data))
+        .catch(error => console.error('Error:', error));
+
+
+
+    }
+</script>
+</html>

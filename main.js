@@ -1,4 +1,5 @@
 const express = require('express')
+const jwt = require('json-web-token')
 const app = express()
 const toml = require('toml');
 const sqlite = require('node:sqlite');
@@ -35,6 +36,24 @@ console.log(
 //calls express 
 app.use(express.json())
 
+//sets up expresses static dir
+const options = {
+  dotfiles: 'ignore',
+  etag: false,
+  extensions: "css",
+  index: false,
+  maxAge: '2h',
+  redirect: false,
+  setHeaders (res, path, stat) {
+    res.set('x-timestamp', Date.now())
+  }
+}
+
+
+
+
+
+
 //log for the request
 app.use((req, res, next) => {
   var log = 'Request Info:' + ' Time:' + new Date() + ' Type:' + req.method + ' Ip:' + req.ip;
@@ -69,7 +88,8 @@ app.route('/login')
         await database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
         let getinfo = database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ NewSession +"';");
         let sessioninfo = getinfo.all()
-        res.json(sessioninfo)
+        let token = await genkey(sessioninfo[0].username, sessioninfo[0].userid, sessioninfo[0].Sessions)
+        res.status(202).json({message: 'login successful', token: token});
       }
     }else{
       res.send(402);
@@ -94,6 +114,27 @@ async function genkey (){
   
 }
 
+//json web token maker
+async function getLoginToken(user, userid, session){
+  let payload = {
+    username: user,
+    password: userid,
+    timestamp: new Date()
+
+  }
+  let secret = session;
+
+  let token = await jwt.encode(secret, payload, function (err, token) {
+  if (err) {
+    console.error(err.name, err.message);
+  } else {
+    return token;
+  }})
+  return token;
+}
+
+// keep at the bottom to ensure it gets checked last
+app.use(express.static(process.cwd() + '/public', options))
 
 app.listen(port, () => {
   console.log(`Currently Listening on ${port}`)
