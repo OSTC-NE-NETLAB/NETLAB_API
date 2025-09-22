@@ -50,7 +50,7 @@ const options = {
 }
 
 
-
+app.use(express.static(process.cwd() + '/public', options))
 
 
 
@@ -61,15 +61,11 @@ app.use((req, res, next) => {
   fs.appendFile('logs.txt','\n' + log, (err) => {
     if (err) throw err;
   }); 
+  
  next()
 })
 
 
-
-
-app.get('/', (req, res) => {
-  res.send(200);
-})
 
 //login functions
 app.route('/login')
@@ -89,7 +85,7 @@ app.route('/login')
         let getinfo = database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ NewSession +"';");
         let sessioninfo = getinfo.all()
         let token = await genkey(sessioninfo[0].username, sessioninfo[0].userid, sessioninfo[0].Sessions)
-        res.status(202).json({message: 'login successful', token: token});
+        res.status(202).json({message: 'login successful', token: token, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
       }
     }else{
       res.send(402);
@@ -106,6 +102,30 @@ app.route('/login')
         if (error) throw error;}
         
       )}
+  })
+//ensures proper formation of body
+app.use((req,res,next) => {
+  if(req.body == undefined){
+    res.redirect('/login')
+  }
+  next()
+})
+//checks if the client is logged in
+app.use((req, res, next) => {
+  console.log(req.body)
+  if(req.body != undefined ){
+    readToken(token);
+    
+  }else{
+    res.redirect('/login');
+  }
+  next();
+})
+
+//homepage
+app.route('/')
+  .get(async (req, res)=>{
+    res.send("wow it worked!")
   })
 
 //session key generator
@@ -132,9 +152,23 @@ async function getLoginToken(user, userid, session){
   }})
   return token;
 }
+//json web decoder
+async function readToken(token){
+  jwt.decode(secret, token, function (err_, decodedPayload, decodedHeader) {
+      if (err) {
+        console.error(err.name, err.message);
+      } else {
+        let decoded_payload = decodedPayload;
+        console.log(decoded_payload)
+        let getuser = database.prepare("SELECT Session FROM auth WHERE username='" + decoded_payload[0].username + "'");
+        let user = getuser.all();
+        console.log(user)
+      }
+    });
+  }
 
-// keep at the bottom to ensure it gets checked last
-app.use(express.static(process.cwd() + '/public', options))
+
+
 
 app.listen(port, () => {
   console.log(`Currently Listening on ${port}`)
