@@ -1,5 +1,5 @@
 const express = require('express')
-const jwt = require('json-web-token')
+const jwt = require('jsonwebtoken')
 const app = express()
 const toml = require('toml');
 const sqlite = require('node:sqlite');
@@ -84,7 +84,7 @@ app.route('/login')
         await database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
         let getinfo = database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ NewSession +"';");
         let sessioninfo = getinfo.all()
-        let token = await genkey(sessioninfo[0].username, sessioninfo[0].userid, sessioninfo[0].Sessions)
+        let token = await getLoginToken(sessioninfo[0].username, sessioninfo[0].userid, sessioninfo[0].Sessions)
         res.status(202).json({message: 'login successful', token: token, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
       }
     }else{
@@ -103,18 +103,14 @@ app.route('/login')
         
       )}
   })
-//ensures proper formation of body
-app.use((req,res,next) => {
-  if(req.body == undefined){
-    res.redirect('/login')
-  }
-  next()
-})
 
 //homepage
 app.route('/')
   .get(async (req, res)=>{
     res.send("wow it worked!")
+  })
+  .post(async (req, res) =>{
+
   })
 
 //session key generator
@@ -125,21 +121,17 @@ async function genkey (){
 
 //json web token maker
 async function getLoginToken(user, userid, session){
-  let payload = {
-    username: user,
+  var payload = {
+    username : user,
     password: userid,
-    timestamp: new Date()
+    session : session,
+    timestamp : new Date(),
 
   }
-  let secret = session;
-
-  let token = await jwt.encode(secret, payload, function (err, token) {
-  if (err) {
-    console.error(err.name, err.message);
-  } else {
-    return token;
-  }})
-  return token;
+  var secret =  fs.readFileSync(config.server_certificates.jwtKey);
+  jwt.sign(secret, {algorithm: 'RSA56'},payload, function (err, token) {
+    if(err){throw err}
+  })
 }
 //json web decoder
 async function readToken(token){

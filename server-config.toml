@@ -1,5 +1,6 @@
 # This is a config toml for your API
 [server_certificates]
-
+# replace this with a private key
+jwtKey = "./private_key.pem"
 [server_interface]
 port = "8080"

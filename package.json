@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "express": "^5.1.0",
-    "json-web-token": "^3.2.0",
+    "jsonwebtoken": "^9.0.2",
     "sqlite3": "^5.1.7",
     "toml": "^3.0.0"
   }
