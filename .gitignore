@@ -136,3 +136,5 @@ dist
 .pnp.*
 private_key.pem
 public_key.pem
+jwtRS256.key
+jwtRS256.key.pub

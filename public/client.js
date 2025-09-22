@@ -1,8 +1,5 @@
 
-function nextPage(){
-    let send = JSON.parse(localStorage.getItem('userdata'))
-    console.log(send)
-}
+
 async function sendForm(){
         let usernamein = document.getElementById('username').value;
         let passwordin = document.getElementById('password').value;
@@ -21,5 +18,4 @@ async function sendForm(){
         delete data.message;
         localStorage.setItem('userdata', JSON.stringify(data))
         console.log(data)
-        nextPage()
     }

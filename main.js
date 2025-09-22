@@ -6,6 +6,7 @@ const sqlite = require('node:sqlite');
 const { DatabaseSync } = require('node:sqlite');
 const database = new DatabaseSync(process.cwd()+'/main.db');
 const fs = require('fs');
+const { decode } = require('punycode');
 const config = toml.parse(fs.readFileSync('./server-config.toml', 'utf-8'));
 const port = config.server_interface.port;
 //special vars
@@ -84,8 +85,8 @@ app.route('/login')
         await database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
         let getinfo = database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ NewSession +"';");
         let sessioninfo = getinfo.all()
-        let token = await getLoginToken(sessioninfo[0].username, sessioninfo[0].userid, sessioninfo[0].Sessions)
-        res.status(202).json({message: 'login successful', token: token, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
+        let Newjwt = await getLoginToken(sessioninfo[0].username, sessioninfo[0].userid, sessioninfo[0].Session)
+        res.status(202).json({message: 'login successful', token: Newjwt, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
       }
     }else{
       res.send(402);
@@ -125,27 +126,19 @@ async function getLoginToken(user, userid, session){
     username : user,
     password: userid,
     session : session,
-    timestamp : new Date(),
+    exp : Math.floor(Date.now() / 1000) + (60 * 60),
 
   }
-  var secret =  fs.readFileSync(config.server_certificates.jwtKey);
-  jwt.sign(secret, {algorithm: 'RSA56'},payload, function (err, token) {
-    if(err){throw err}
-  })
+  var privateKey =  fs.readFileSync(config.server_certificates.jwtKey);
+  var Newjwt = jwt.sign(payload, privateKey, {algorithm: 'RS256'})
+  return Newjwt;
 }
 //json web decoder
 async function readToken(token){
-  jwt.decode(secret, token, function (err_, decodedPayload, decodedHeader) {
-      if (err) {
-        console.error(err.name, err.message);
-      } else {
-        let decoded_payload = decodedPayload;
-        console.log(decoded_payload)
-        let getuser = database.prepare("SELECT Session FROM auth WHERE username='" + decoded_payload[0].username + "'");
-        let user = getuser.all();
-        console.log(user)
-      }
-    });
+  var privateKey = await fs.readFileSync(config.server_certificates.jwtKey)
+  try{var decoded = jwt.verify(token, privateKey);}
+  catch(err){ decoded = 402; throw err;}
+  return decoded;
   }
 
 
