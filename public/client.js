@@ -1,25 +1,25 @@
 
 function nextPage(){
-    
+    let send = JSON.parse(localStorage.getItem('userdata'))
+    console.log(send)
 }
-function sendForm(){
+async function sendForm(){
         let usernamein = document.getElementById('username').value;
         let passwordin = document.getElementById('password').value;
-        let server_return;
-        let response = {
+        let send = {
             username : usernamein,
             password : passwordin
         }
-        fetch(window.location.href, {
+        try {var getdata = await fetch(window.location.href, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
          },
-         body: JSON.stringify(response)
-        })
-        .then(response => response.json())
-        .then(data => server_return)
-        .catch(error => console.error('Error:', error));
-        localStorage.setItem('server_data', JSON.stringify(server_return))
+         body: JSON.stringify(send)
+        })}catch(err) {throw err;}
+        let data = await getdata.json();
+        delete data.message;
+        localStorage.setItem('userdata', JSON.stringify(data))
+        console.log(data)
         nextPage()
     }

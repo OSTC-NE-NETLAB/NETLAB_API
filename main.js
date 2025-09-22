@@ -42,7 +42,7 @@ const options = {
   etag: false,
   extensions: "css",
   index: false,
-  maxAge: '2h',
+  maxAge: '0',
   redirect: false,
   setHeaders (res, path, stat) {
     res.set('x-timestamp', Date.now())
@@ -109,17 +109,6 @@ app.use((req,res,next) => {
     res.redirect('/login')
   }
   next()
-})
-//checks if the client is logged in
-app.use((req, res, next) => {
-  console.log(req.body)
-  if(req.body != undefined ){
-    readToken(token);
-    
-  }else{
-    res.redirect('/login');
-  }
-  next();
 })
 
 //homepage
