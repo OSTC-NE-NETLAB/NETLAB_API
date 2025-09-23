@@ -8,14 +8,14 @@
     <script src="/client.js"></script>
 </head>
 <body >
-   <h1>Login</h1>
-   <title>Login</title>
-   <label for="username">username:</label><br>
-   <input type="text" name="username" id="username"><br>
-   <label for="password">password:</label><br>
-   <input type="password" name="password" id="password" >
-   <button onclick="sendForm();">Enter</button>
-    <button>verify token</button>
-    <p id="status"></p>
+    <div id="login_box">
+        <h3>NETLAB LOGIN</h3>
+        <input type="text" name="username" id="username" placeholder="username">
+        <input type="password" name="password" id="password" placeholder="password">
+        <div id="buttons">
+            <button onclick="sendForm();">Log In</button>
+            <button onclick="goToSignup()">Sign Up</button>
+        </div>
+    </div>
 </body>
 </html>

@@ -1,1 +1,58 @@
-test this is a css file
+#login_box{
+    height: 28vh;
+    width: 30vw;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    left: 35vw;
+    top: 35vh;
+    background-color: white;
+    text-align: center;
+    border: 2px black solid;
+}
+body{
+    background-color: #009213;
+    margin: 0px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+#username{
+    width: 90%;
+    align-self: center;
+    border-radius: 0%;
+    border: 1px solid black;
+    flex: 10%;
+    margin-bottom: 3px;
+    font-size: 1.5vw;
+    
+}
+#password{
+    width: 90%;
+    align-self: center;
+    border-radius: 0%;
+    border: 1px solid rgba(75, 75, 75, 0.616);
+    flex: 10%;
+    font-size: 1.5vw;
+}
+#buttons{
+    flex: 25%;
+    width: 100%;
+    display: flex;
+    align-self: center;
+    color: rgba(102, 102, 102, 0.582);
+    
+}
+button{
+    width: 10vw;
+    flex: 50%;
+    border-radius: 0%;
+    border: 0px;
+    background-color: #009213;
+    font-size: 1.5vw;
+}
+button:hover{
+    background-color: white;
+}
+input{
+    margin-bottom: 2px;
+    width: 10vw;
+}

@@ -1,0 +1,41 @@
+.textbox{
+    flex: 10%;
+    font-size: 1.5vw;
+    margin-bottom: 2px;
+    width: 90%;
+    align-self: center;
+}
+#login_box{
+    height: 45vh;
+    width: 30vw;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    left: 35vw;
+    top: 25vh;
+    background-color: white;
+    text-align: center;
+    border: 2px black solid;
+}
+#buttons{
+    flex: 15%;
+    display: flex;
+    flex-direction: row;
+
+}
+.buttons{
+    flex: 50%;
+    width: 90%;
+    background-color: #009213;
+    border: 1px solid black;
+    font-size: 1.5vw;
+
+}
+.buttons:hover{
+    background-color: white;
+}
+body{
+    background-color: #009213;
+    margin: 0px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}

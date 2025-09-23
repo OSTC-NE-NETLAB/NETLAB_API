@@ -1,3 +1,9 @@
+function goToSignup(){
+        window.location.href = window.location.origin + '/signup';
+}
+function goToLogin(){
+        window.location.href = window.location.origin + '/login';
+}
 
 
 async function sendForm(){

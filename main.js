@@ -70,7 +70,7 @@ app.route('/login')
 
     let username = req.body.username;
     let password = req.body.password;
-    if(username != undefined  && password != undefined){
+    if(username && password){
 
       let user_pass = database.prepare("SELECT username, password, userid FROM auth WHERE username= ? AND password= ?;")
       let user_db = user_pass.all(username, password)
@@ -101,7 +101,11 @@ app.route('/login')
         
       )}
   })
-
+//sign up page
+app.route('/signup')
+  .get((req, res) => {
+    res.sendFile(path.join(__dirname + '/html/signup.html'))
+  })
 //homepage
 app.route('/')
   .get(async (req, res)=>{
@@ -110,6 +114,7 @@ app.route('/')
   .post(async (req, res) =>{
 
   })
+
 
 //session key generator
 async function genSession (username, userid){
