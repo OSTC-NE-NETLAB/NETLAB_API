@@ -4,6 +4,7 @@ const toml = require('toml');
 const { DatabaseSync } = require('node:sqlite');
 const database = new DatabaseSync(process.cwd()+'/main.db');
 const fs = require('fs');
+const path = require('path');
 const config = toml.parse(fs.readFileSync('./server-config.toml', 'utf-8'));
 const port = config.server_interface.port;
 const crypto = require('crypto');
@@ -46,7 +47,7 @@ const options = {
 }
 
 
-app.use(express.static(process.cwd() + '/public', options))
+app.use(express.static(path.join(__dirname, "public")))
 
 
 
@@ -91,7 +92,7 @@ app.route('/login')
     })
   .get((req, res) =>{
     try{
-      res.sendFile(process.cwd() + '/html/login.html')
+      res.sendFile(path.join(__dirname, '/html/login.html'))
     }catch(err){
       res.send(500)
       let log = 'Request info:' + ' Time: ' + new Date() + ' Type: ' + req.method + ' Ip:' + req.ip;
