@@ -71,8 +71,8 @@ app.route('/login')
     let password = req.body.password;
     if(username != undefined  && password != undefined){
 
-      const user_pass = database.prepare("SELECT username, password, userid FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
-      let user_db = user_pass.all()
+      let user_pass = database.prepare("SELECT username, password, userid FROM auth WHERE username= ? AND password= ?;")
+      let user_db = user_pass.all(username, password)
       var Session = await genSession(user_db[0].username, user_db[0].userid);
       if(user_db.length == 0){
         res.send(402)
