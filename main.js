@@ -79,8 +79,8 @@ app.route('/login')
       } else{
         let update = database.prepare("UPDATE auth SET Session = ? WHERE username= ? AND password= ?")
         update.run(Session.Session, user_db[0].username, user_db[0].password)
-        let getinfo = await database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ Session.Session +"';");
-        let sessioninfo = getinfo.all()
+        let getinfo = await database.prepare("SELECT userid, username, Session FROM auth WHERE Session= ?;");
+        let sessioninfo = getinfo.all(Session.Session)
         
         res.status(202).json({message: 'login successful', session: Session, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
       }
