@@ -1,18 +1,13 @@
 const express = require('express')
-const jwt = require('jsonwebtoken')
 const app = express()
 const toml = require('toml');
-const sqlite = require('node:sqlite');
 const { DatabaseSync } = require('node:sqlite');
 const database = new DatabaseSync(process.cwd()+'/main.db');
 const fs = require('fs');
-const { decode } = require('punycode');
 const config = toml.parse(fs.readFileSync('./server-config.toml', 'utf-8'));
 const port = config.server_interface.port;
-//special vars
-var return_code;
-var return_body;
-var retuen_headers;
+const crypto = require('crypto');
+
 
 //text on start 
 console.log(
@@ -76,17 +71,18 @@ app.route('/login')
     let password = req.body.password;
     if(username != undefined  && password != undefined){
 
-      const user_pass = database.prepare("SELECT username, password FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
+      const user_pass = database.prepare("SELECT username, password, userid FROM auth WHERE username='"+ username +"' AND password='"+ password +"';")
       let user_db = user_pass.all()
+      var Session = await genSession(user_db[0].username, user_db[0].userid);
       if(user_db.length == 0){
         res.send(402)
       } else{
-        var NewSession = await genkey();
-        await database.exec("UPDATE auth SET Session = '" + NewSession + "' WHERE username='" + username + "' AND password='" + password + "';")
-        let getinfo = database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ NewSession +"';");
+        let update = database.prepare("UPDATE auth SET Session = ? WHERE username= ? AND password= ?")
+        update.run(Session.Session, user_db[0].username, user_db[0].password)
+        let getinfo = await database.prepare("SELECT userid, username, Session FROM auth WHERE Session='"+ Session.Session +"';");
         let sessioninfo = getinfo.all()
-        let Newjwt = await getLoginToken(sessioninfo[0].username, sessioninfo[0].userid, sessioninfo[0].Session)
-        res.status(202).json({message: 'login successful', token: Newjwt, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
+        
+        res.status(202).json({message: 'login successful', session: Session, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
       }
     }else{
       res.send(402);
@@ -115,31 +111,35 @@ app.route('/')
   })
 
 //session key generator
-async function genkey (){
- return Math.random().toString(36).substring(2);
-  
+async function genSession (username, userid){
+  let PrivateKey = await fs.readFileSync(config.server_certificates.PrivateKey, "utf-8");
+  let PublicKey = await fs.readFileSync(config.server_certificates.PublicKey, "utf-8");
+  let data = {
+    username : username,
+    userid : userid,
+    exp: Math.floor(Date.now() / 1000) + (60 * 60),
+    init: Math.floor(Date.now()),
+  }
+  let payload = JSON.stringify(data)
+  let Session = crypto.publicEncrypt(
+  {
+    key: PublicKey,
+    padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+    oaepHash: "sha256",
+  },
+
+  Buffer.from(payload));
+  let SessionSig =  crypto.sign("sha256", Buffer.from(Session), {
+  key: PrivateKey,
+  padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+  });
+  let Verfied = {
+    sig : SessionSig.toString('base64'),
+    Session: Session.toString('base64'),
+  }
+  return Verfied;
 }
 
-//json web token maker
-async function getLoginToken(user, userid, session){
-  var payload = {
-    username : user,
-    password: userid,
-    session : session,
-    exp : Math.floor(Date.now() / 1000) + (60 * 60),
-
-  }
-  var privateKey =  fs.readFileSync(config.server_certificates.jwtKey);
-  var Newjwt = jwt.sign(payload, privateKey, {algorithm: 'RS256'})
-  return Newjwt;
-}
-//json web decoder
-async function readToken(token){
-  var privateKey = await fs.readFileSync(config.server_certificates.jwtKey)
-  try{var decoded = jwt.verify(token, privateKey);}
-  catch(err){ decoded = 402; throw err;}
-  return decoded;
-  }
 
 
 
