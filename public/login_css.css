@@ -11,27 +11,9 @@
     border: 2px black solid;
 }
 body{
-    background-color: #009213;
+    background-color: #36723e;
     margin: 0px;
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-}
-#username{
-    width: 90%;
-    align-self: center;
-    border-radius: 0%;
-    border: 1px solid black;
-    flex: 10%;
-    margin-bottom: 3px;
-    font-size: 1.5vw;
-    
-}
-#password{
-    width: 90%;
-    align-self: center;
-    border-radius: 0%;
-    border: 1px solid rgba(75, 75, 75, 0.616);
-    flex: 10%;
-    font-size: 1.5vw;
 }
 #buttons{
     flex: 25%;
@@ -47,12 +29,23 @@ button{
     border-radius: 0%;
     border: 0px;
     background-color: #009213;
+    color: white;
     font-size: 1.5vw;
+    transition: all ease 0.3s;
 }
 button:hover{
     background-color: white;
+    color: black;
+    transition: all ease 0.3s;
 }
-input{
-    margin-bottom: 2px;
-    width: 10vw;
+
+.textbox{
+    margin-bottom: 10px;
+    padding-bottom: 3px;
+    width: 90%;
+    align-self: center;
+    border-radius: 5px;
+    border: 1px solid rgba(75, 75, 75, 0.788);
+    flex: 10%;
+    font-size: 1.5vw;
 }

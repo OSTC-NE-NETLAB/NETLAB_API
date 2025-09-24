@@ -1,14 +1,22 @@
-const express = require('express')
+// imported packages
+const express = require('express');
 const app = express()
 const toml = require('toml');
 const { DatabaseSync } = require('node:sqlite');
-const database = new DatabaseSync(process.cwd()+'/main.db');
+const crypto = require('crypto');
+const { createVerify } = require('crypto');
 const fs = require('fs');
 const path = require('path');
+
+//imported variables
+const database = new DatabaseSync(process.cwd()+'/main.db');
 const config = toml.parse(fs.readFileSync('./server-config.toml', 'utf-8'));
 const port = config.server_interface.port;
-const crypto = require('crypto');
 
+
+//Keys for encryption
+const PrivateKey =  fs.readFileSync(config.server_certificates.PrivateKey, "utf-8");
+const PublicKey =  fs.readFileSync(config.server_certificates.PublicKey, "utf-8");
 
 //text on start 
 console.log(
@@ -106,20 +114,37 @@ app.route('/signup')
   .get((req, res) => {
     res.sendFile(path.join(__dirname + '/html/signup.html'))
   })
+app.use( async (req,res, next) => {
+  
+  let sessioninf = await JSON.parse(req.headers['authorization']);
+  let session = sessioninf.session;
+  let auth = sessioninf.sig;
+  if(session && auth){
+    let authed = verifySession(session, auth)
+    if(!authed){
+      console.log("bad sign in")
+      res.sendStatus(402)
+    }else{
+      next()
+    }
+  }else{
+    res.sendStatus(402).end;
+    
+  }
+})
 //homepage
-app.route('/')
+app.route('/home')
   .get(async (req, res)=>{
-    res.send("wow it worked!")
+    res.sendFile(path.join(__dirname + "/html/home.html"))
   })
   .post(async (req, res) =>{
-
+    
   })
+
 
 
 //session key generator
 async function genSession (username, userid){
-  let PrivateKey = await fs.readFileSync(config.server_certificates.PrivateKey, "utf-8");
-  let PublicKey = await fs.readFileSync(config.server_certificates.PublicKey, "utf-8");
   let data = {
     username : username,
     userid : userid,
@@ -139,13 +164,30 @@ async function genSession (username, userid){
   key: PrivateKey,
   padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
   });
-  let Verfied = {
+  let SignedEncryp = {
     sig : SessionSig.toString('base64'),
     Session: Session.toString('base64'),
   }
-  return Verfied;
+  return SignedEncryp;
 }
-
+function verifySession(data, sig){
+// Verify signature over the encrypted session
+var isValid = crypto.verify(
+  'sha256',
+  Buffer.from(data, 'base64'),
+  {
+    key: PublicKey,
+    padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+  },
+  Buffer.from(sig, 'base64')
+);
+  if(isValid){
+    let getUser = database.prepare('SELECT username FROM auth WHERE Session = ?')
+    let checkStat = getUser.all(data);
+    if(checkStat.length >= 1){Loggedin = true}
+  }
+  return Loggedin;
+}
 
 
 
