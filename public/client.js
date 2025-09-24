@@ -50,14 +50,13 @@ async function attemptLogin(){
         
     }
     async function goHome(){
-        let session = localStorage.getItem('session')
+        window.location.href = window.location.origin + "/home"
         try {var getdata = await authFetch(window.location.origin + "/home", {
         method: 'GET',
         headers: {
           'Content-Type': 'document/html'
          }
         })}catch(err) {throw err;}
-        
     }
     function authFetch(url, options = {}) {
         var token = localStorage.getItem('session'); 

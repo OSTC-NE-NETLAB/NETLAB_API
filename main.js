@@ -82,10 +82,10 @@ app.route('/login')
 
       let user_pass = database.prepare("SELECT username, password, userid FROM auth WHERE username= ? AND password= ?;")
       let user_db = user_pass.all(username, password)
-      var Session = await genSession(user_db[0].username, user_db[0].userid);
       if(user_db.length == 0){
-        res.send(402)
+        res.status(402).json({message : "Bad username or password"})
       } else{
+        var Session = await genSession(user_db[0].username, user_db[0].userid);
         let update = database.prepare("UPDATE auth SET Session = ? WHERE username= ? AND password= ?")
         update.run(Session.Session, user_db[0].username, user_db[0].password)
         let getinfo = await database.prepare("SELECT userid, username, Session FROM auth WHERE Session= ?;");
@@ -115,20 +115,21 @@ app.route('/signup')
     res.sendFile(path.join(__dirname + '/html/signup.html'))
   })
 app.use( async (req,res, next) => {
-  
-  let sessioninf = await JSON.parse(req.headers['authorization']);
-  let session = sessioninf.session;
-  let auth = sessioninf.sig;
+  if(req.headers['authorization']){
+    let sessioninf = await JSON.parse(req.headers['authorization']);
+    var session = sessioninf.session;
+    var auth = sessioninf.sig;
+  }
   if(session && auth){
     let authed = verifySession(session, auth)
-    if(!authed){
+    if(authed){
+      next()
+    }else{
       console.log("bad sign in")
       res.sendStatus(402)
-    }else{
-      next()
     }
   }else{
-    res.sendStatus(402).end;
+    res.sendStatus(402);
     
   }
 })
