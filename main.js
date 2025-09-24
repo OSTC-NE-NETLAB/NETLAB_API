@@ -72,8 +72,9 @@ app.use((req, res, next) => {
 
 
 
+
 //login functions
-app.route('/login')
+app.route('/')
   .post(async (req, res) =>{
 
     let username = req.body.username;
@@ -109,16 +110,15 @@ app.route('/login')
         
       )}
   })
-//sign up page
-app.route('/signup')
-  .get((req, res) => {
-    res.sendFile(path.join(__dirname + '/html/signup.html'))
-  })
+//check auth
 app.use( async (req,res, next) => {
   if(req.headers['authorization']){
     let sessioninf = await JSON.parse(req.headers['authorization']);
-    var session = sessioninf.session;
-    var auth = sessioninf.sig;
+    try{var session = sessioninf.session;
+    var auth = sessioninf.sig;}
+    catch(err){
+      res.status(402);
+    }
   }
   if(session && auth){
     let authed = verifySession(session, auth)
@@ -126,13 +126,21 @@ app.use( async (req,res, next) => {
       next()
     }else{
       console.log("bad sign in")
-      res.sendStatus(402)
+      res.status(402).redirect('/')
     }
   }else{
-    res.sendStatus(402);
+    res.status(402).redirect('/');
     
   }
 })
+
+
+
+//sign up page
+app.route('/signup')
+  .get((req, res) => {
+    res.sendFile(path.join(__dirname + '/html/signup.html'))
+  })
 //homepage
 app.route('/home')
   .get(async (req, res)=>{

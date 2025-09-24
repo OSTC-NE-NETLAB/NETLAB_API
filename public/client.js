@@ -49,26 +49,35 @@ async function attemptLogin(){
         }
         
     }
-    async function goHome(){
-        window.location.href = window.location.origin + "/home"
-        try {var getdata = await authFetch(window.location.origin + "/home", {
+
+async function goHome(){
+        try {await authFetch(window.location.origin + "/home", {
         method: 'GET',
         headers: {
           'Content-Type': 'document/html'
          }
-        })}catch(err) {throw err;}
+        })
+        .then(response => response.text())
+        .then(html => {
+        document.documentElement.innerHTML = html;})
+        }catch(err) {throw err;}
     }
-    function authFetch(url, options = {}) {
+function signOut(){
+        localStorage.removeItem('session');
+        localStorage.removeItem('userdata');
+        window.location.reload();
+}
+function authFetch(url, options = {}) {
         var token = localStorage.getItem('session'); 
 
-        const defaultHeaders = {
-                'Authorization': `${token}`,
-                'Content-Type': 'application/json',
-        };
+         var defaultHeaders = {
+              'Authorization': `${token}`,
+              'Content-Type': 'application/json',
+      };
 
-        options.headers = {
-                ...defaultHeaders,
-                ...options.headers,
+       options.headers = {
+       ...defaultHeaders,
+      ...options.headers,
         };
 
     return fetch(url, options);
