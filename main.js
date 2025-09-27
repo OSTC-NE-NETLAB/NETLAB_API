@@ -142,12 +142,14 @@ app.route('/signup')
     res.sendFile(path.join(__dirname + '/html/signup.html'))
   })
 //homepage
-app.route('/home')
+app.route('/menu')
   .get(async (req, res)=>{
-    res.sendFile(path.join(__dirname + "/html/home.html"))
+    res.sendFile(path.join(__dirname + "/html/menu.html"));
   })
-  .post(async (req, res) =>{
-    
+
+app.route('/main')
+  .get(async (req, res) => {
+    res.sendFile(path.join(__dirname + "/html/main.html"))
   })
 
 

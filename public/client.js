@@ -51,7 +51,7 @@ async function attemptLogin(){
     }
 
 async function goHome(){
-        try {await authFetch(window.location.origin + "/home", {
+        try {await authFetch(window.location.origin + "/menu", {
         method: 'GET',
         headers: {
           'Content-Type': 'document/html'
@@ -61,7 +61,23 @@ async function goHome(){
         .then(html => {
         document.documentElement.innerHTML = html;})
         }catch(err) {throw err;}
+        getMainContent()
     }
+
+async function getMainContent() {
+        try {await authFetch(window.location.origin + "/main", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'document/html'
+         }
+        })
+        .then(response => response.text())
+        .then(content => {
+        document.getElementById('content_window').setAttribute('srcdoc', content)})
+        }catch(err) {throw err;}
+        
+}
+
 function signOut(){
         localStorage.removeItem('session');
         localStorage.removeItem('userdata');
