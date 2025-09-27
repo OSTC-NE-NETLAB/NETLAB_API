@@ -110,6 +110,24 @@ app.route('/')
         
       )}
   })
+
+//sign up page
+app.route('/signup')
+  .get((req, res) => {
+    res.sendFile(path.join(__dirname + '/html/signup.html'))
+  })
+  .post((req, res) => {
+      let firstName= req.body.firstName;
+      let lastName= req.body.lastName;
+      let password = req.body.password;
+      let username = req.body.username;
+      if(firstName && lastName && password && username){
+          res.sendStatus(202)
+      }else{
+        res.status(400).send('Malformed Request')
+      }
+  })
+
 //check auth
 app.use( async (req,res, next) => {
   if(req.headers['authorization']){
@@ -135,12 +153,6 @@ app.use( async (req,res, next) => {
 })
 
 
-
-//sign up page
-app.route('/signup')
-  .get((req, res) => {
-    res.sendFile(path.join(__dirname + '/html/signup.html'))
-  })
 //homepage
 app.route('/menu')
   .get(async (req, res)=>{

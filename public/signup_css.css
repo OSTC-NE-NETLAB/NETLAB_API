@@ -4,6 +4,10 @@
     margin-bottom: 3px;
     width: 90%;
     align-self: center;
+    border: 1px solid rgba(75, 75, 75, 0.788);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding-bottom: 3px;
 }
 #login_box{
     height: 45vh;
@@ -29,13 +33,16 @@
     background-color: #009213;
     border: 1px solid black;
     font-size: 1.5vw;
-
+    color: white;
+    transition: ease .3s;
 }
 .buttons:hover{
     background-color: white;
+    color: black;
+    transition: ease .3s;
 }
 body{
-    background-color: #009213;
+    background-color: #36723e;
     margin: 0px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }

@@ -1,3 +1,4 @@
+const { response } = require("express");
 
 function goToSignup(){
         window.location.href = window.location.origin + '/signup';
@@ -83,6 +84,31 @@ function signOut(){
         localStorage.removeItem('userdata');
         window.location.reload();
 }
+async function signUp(){
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+        let firstName = document.getElementById('first').value;
+        let lastName = document.getElementById('last').value;
+        let code;
+        let data = {
+                username : username,
+                password : password,
+                firstName : firstName,
+                lastName : lastName,
+        }
+
+        try {await authFetch(window.location.origin + "/signup", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+         },
+        body: JSON.stringify(data)
+        })
+        .then(response => code = response.status())
+        }catch(err) {throw err;}
+        console.log(code)
+}
+
 function authFetch(url, options = {}) {
         var token = localStorage.getItem('session'); 
 
