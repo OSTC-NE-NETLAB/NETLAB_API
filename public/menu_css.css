@@ -1,5 +1,7 @@
 body{
     margin: 0%;
+    height: fit-content;
+    background-color: #009213;
 }
 nav{
     background-color: #009213;
@@ -31,5 +33,12 @@ button.navbutt:hover{
 }
 iframe{
     width: 100%;
-    height: 100%;
+    height: 89vh;
+}
+#footer{
+    width: 100%;
+    text-align: center;
+    color: white;
+    background-color: #009213;
+    height: max-content;
 }

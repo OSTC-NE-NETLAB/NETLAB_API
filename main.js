@@ -4,9 +4,9 @@ const app = express()
 const toml = require('toml');
 const { DatabaseSync } = require('node:sqlite');
 const crypto = require('crypto');
-const { createVerify } = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 //imported variables -- ONLY CHANGE IF YOU KNOW WHAT YOUR DOING!!!
 const database = new DatabaseSync(process.cwd()+'/main.db');
@@ -77,14 +77,13 @@ app.route('/')
   .post(async (req, res) =>{
 
     let username = await Buffer.from(req.body.username).toString('base64');
-    let password = await Buffer.from(req.body.password).toString('base64');
+    let password = req.body.password
     if(username && password){
 
-      let user_pass = database.prepare("SELECT username, password, userid FROM auth WHERE username= ? AND password= ?;")
-      let user_db = user_pass.all(username, password)
-      if(user_db.length == 0){
-        res.status(402).json({message : "Bad username or password"})
-      } else{
+      let user_pass = database.prepare("SELECT username, password, userid FROM auth WHERE username= ?")
+      let user_db = user_pass.all(username)
+      let autherizedPass = await bcrypt.compare(password, user_db[0].password)
+      if(user_db.length > 0 && autherizedPass){
         var Session = await genSession(user_db[0].username, user_db[0].userid);
         let update = database.prepare("UPDATE auth SET Session = ? WHERE username= ? AND password= ?")
         update.run(Session.Session, user_db[0].username, user_db[0].password)
@@ -92,9 +91,12 @@ app.route('/')
         let sessioninfo = getinfo.all(Session.Session)
         
         res.status(202).json({message: 'login successful', session: Session, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
+        
+      } else{
+        res.status(401).json({message : "Bad username or password"})
       }
     }else{
-      res.send(402);
+      res.status(400).json({message : "Bad Request, client js error"});
     } 
  
     })
@@ -127,10 +129,10 @@ app.route('/signup')
         storeNewUser(firstName, lastName, id)
         res.status(202).json({message : "user successfully created"})
         }else{
-          res.status(406).json({message : "username already in use"})
+          res.status(409).json({message : "username already in use"})
         }
       }else{
-        res.status(400).send('Malformed Request')
+        res.status(400).json({message : 'Malformed Request'})
       }
   })
 
@@ -141,18 +143,18 @@ app.use( async (req,res, next) => {
     try{var session = sessioninf.session;
     var auth = sessioninf.sig;}
     catch(err){
-      res.status(402);
+      res.status(401);
     }
   }
   if(session && auth){
-    let authed = verifySession(session, auth)
+    let authed = await verifySession(session, auth)
     if(authed){
       next()
     }else{
-      res.status(402).redirect('/')
+      res.status(401).redirect('/')
     }
   }else{
-    res.status(402).redirect('/');
+    res.status(400).redirect('/');
     
   }
 })
@@ -228,13 +230,14 @@ async function verifySession(data, sig){
       if(isValid){
         let getUser = database.prepare('SELECT username FROM auth WHERE Session = ?')
         let checkStat = getUser.all(data);
-        if(checkStat.length >= 1){Loggedin = true}
+        if(checkStat.length >= 1){return true}
+      }else{
+        return false
       }
   }
   else{
-    Loggedin = false;
+    return false
   }
-  return Loggedin;
 }
 async function checkAvailable(username) {
   let user64 = await Buffer.from(username).toString('base64')
@@ -250,9 +253,9 @@ async function checkAvailable(username) {
 //store the username & password into the auth table
 async function storeNewAuth(username, password) {
   let username64 = await Buffer.from(username).toString('base64')
-  let password64 = await Buffer.from(password).toString('base64')
+  let passwordHash = await bcrypt.hash(password, 12)
   try{let insertUser = database.prepare("INSERT INTO auth(username, password) VALUES (?, ?)")
-  insertUser.run(username64, password64)
+  insertUser.run(username64, passwordHash)
   let getid = database.prepare("SELECT userid FROM auth WHERE username = ? ")
   let id = getid.all(username64)
   return id[0].userid;
