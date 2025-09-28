@@ -8,13 +8,13 @@ const { createVerify } = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-//imported variables
+//imported variables -- ONLY CHANGE IF YOU KNOW WHAT YOUR DOING!!!
 const database = new DatabaseSync(process.cwd()+'/main.db');
 const config = toml.parse(fs.readFileSync('./server-config.toml', 'utf-8'));
 const port = config.server_interface.port;
 
 
-//Keys for encryption
+//Keys for encryption -- CHANGE IN CONFIG.TOML
 const PrivateKey =  fs.readFileSync(config.server_certificates.PrivateKey, "utf-8");
 const PublicKey =  fs.readFileSync(config.server_certificates.PublicKey, "utf-8");
 
@@ -38,10 +38,10 @@ console.log(
 
 
 
-//calls express 
+//Starts Express -- DO NOT MOVE 
 app.use(express.json())
 
-//sets up expresses static dir
+//sets up expresses static dir -- !UNUSED VAR! -- DO NOT REMOVE
 const options = {
   dotfiles: 'ignore',
   etag: false,
@@ -54,12 +54,12 @@ const options = {
   }
 }
 
-
+//Allows access to the ./public folder -- DO NOT MOVE
 app.use(express.static(path.join(__dirname, "public")))
 
 
 
-//log for the request
+//log for the request -- !may change!
 app.use((req, res, next) => {
   var log = 'Request Info:' + ' Time:' + new Date() + ' Type:' + req.method + ' Ip:' + req.ip;
   
@@ -72,13 +72,12 @@ app.use((req, res, next) => {
 
 
 
-
-//login functions
+//login route -- DO NOT MOVE BELOW THE AUTH MIDDLEWARE
 app.route('/')
   .post(async (req, res) =>{
 
-    let username = req.body.username;
-    let password = req.body.password;
+    let username = await Buffer.from(req.body.username).toString('base64');
+    let password = await Buffer.from(req.body.password).toString('base64');
     if(username && password){
 
       let user_pass = database.prepare("SELECT username, password, userid FROM auth WHERE username= ? AND password= ?;")
@@ -111,24 +110,31 @@ app.route('/')
       )}
   })
 
-//sign up page
+//sign up page -- DO NOT MOVE BELOW THE AUTH MIDDLEWARE
 app.route('/signup')
   .get((req, res) => {
     res.sendFile(path.join(__dirname + '/html/signup.html'))
   })
-  .post((req, res) => {
+  .post(async (req, res) => {
       let firstName= req.body.firstName;
       let lastName= req.body.lastName;
       let password = req.body.password;
       let username = req.body.username;
       if(firstName && lastName && password && username){
-          res.sendStatus(202)
+        let Available = await checkAvailable(username);
+        if(Available){  
+        let id = await storeNewAuth(username, password)
+        storeNewUser(firstName, lastName, id)
+        res.status(202).json({message : "user successfully created"})
+        }else{
+          res.status(406).json({message : "username already in use"})
+        }
       }else{
         res.status(400).send('Malformed Request')
       }
   })
 
-//check auth
+//check auth middleware -- ANYTHING UNDER THIS MUST GIVE AUTH HEADERS
 app.use( async (req,res, next) => {
   if(req.headers['authorization']){
     let sessioninf = await JSON.parse(req.headers['authorization']);
@@ -143,7 +149,6 @@ app.use( async (req,res, next) => {
     if(authed){
       next()
     }else{
-      console.log("bad sign in")
       res.status(402).redirect('/')
     }
   }else{
@@ -166,6 +171,9 @@ app.route('/main')
 
 
 
+/*#####################################################################################
+FUNCTION AREA 
+#####################################################################################*/
 //session key generator
 async function genSession (username, userid){
   let data = {
@@ -193,25 +201,86 @@ async function genSession (username, userid){
   }
   return SignedEncryp;
 }
-function verifySession(data, sig){
+
+//session expiration and authentication 
+async function verifySession(data, sig){
 // Verify signature over the encrypted session
-var isValid = crypto.verify(
-  'sha256',
-  Buffer.from(data, 'base64'),
-  {
-    key: PublicKey,
-    padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-  },
-  Buffer.from(sig, 'base64')
-);
-  if(isValid){
-    let getUser = database.prepare('SELECT username FROM auth WHERE Session = ?')
-    let checkStat = getUser.all(data);
-    if(checkStat.length >= 1){Loggedin = true}
+  let decryptedBuf = await crypto.privateDecrypt(
+    {
+      key: PrivateKey,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256',
+    },
+    Buffer.from(data, 'base64')
+  );
+  let datajson = JSON.parse(decryptedBuf)
+  let expire = datajson.exp;
+  if(expire >= Math.floor(Date.now() / 1000)){
+    var isValid = crypto.verify(
+      'sha256',
+      Buffer.from(data, 'base64'),
+      {
+        key: PublicKey,
+        padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+      },
+      Buffer.from(sig, 'base64')
+    );
+      if(isValid){
+        let getUser = database.prepare('SELECT username FROM auth WHERE Session = ?')
+        let checkStat = getUser.all(data);
+        if(checkStat.length >= 1){Loggedin = true}
+      }
+  }
+  else{
+    Loggedin = false;
   }
   return Loggedin;
 }
+async function checkAvailable(username) {
+  let user64 = await Buffer.from(username).toString('base64')
+  let check = database.prepare("SELECT userid FROM auth WHERE username = ?")
+  let Available = check.all(user64)
+  if(Available.length != 0){
+    return false
+  }else{
+    return true;
+  }
+}
 
+//store the username & password into the auth table
+async function storeNewAuth(username, password) {
+  let username64 = await Buffer.from(username).toString('base64')
+  let password64 = await Buffer.from(password).toString('base64')
+  try{let insertUser = database.prepare("INSERT INTO auth(username, password) VALUES (?, ?)")
+  insertUser.run(username64, password64)
+  let getid = database.prepare("SELECT userid FROM auth WHERE username = ? ")
+  let id = getid.all(username64)
+  return id[0].userid;
+  }
+  catch(err){
+    throw err
+  }
+}
+
+//store the first & last name aswell as the id and date made in users
+async function storeNewUser(first, last, id) {
+  let time = new Date().toUTCString();
+  let first64 = await Buffer.from(first).toString('base64')
+  let last64 = await Buffer.from(last).toString('base64')
+  try{
+    let insertId = database.prepare('INSERT INTO users(userid) VALUES (?)')
+    await insertId.run(id)
+    let insertUser = database.prepare("UPDATE users SET first = ?, last = ?, made = ? WHERE userid = ?")
+    await insertUser.run(first64, last64, time, id)
+    return true
+  }catch(err){
+    throw err;
+  } 
+}
+/**#######################################################################################
+ * END OF FUNCTION AREA
+ * #######################################################################################
+ */
 
 
 
