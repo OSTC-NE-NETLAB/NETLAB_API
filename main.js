@@ -171,11 +171,48 @@ app.route('/main')
     res.sendFile(path.join(__dirname + "/html/main.html"))
   })
 
+app.route('/inventory')
+  .get(async (req, res) => {
+    res.sendFile(path.join(__dirname + "/html/inventory.html"))
+  })
 
+app.route('/inventory/items/:id')
+  .get(async (req, res) =>{
+
+  })
+app.route('/inventory/update')
+  .post(async (req, res) =>{
+    let asset = req.body.asset_id;
+    let category = req.body.category;
+    let description = req.body.description;
+    let date = req.body.date;
+    if(asset && category && description && date){
+      try{
+         let accepted = insDatabase(asset, category, description, date)
+         res.status(200).json({status : accepted})
+      }catch(err){
+        res.sendStatus(500).end();
+        throw err;
+      }
+    }else{
+      res.status(400).json({message : "Malformed Request"})
+    }
+  })
 
 /*#####################################################################################
 FUNCTION AREA 
 #####################################################################################*/
+//input data into inventory
+async function insDatabase(asset, category, description, date){
+  try{
+    let inData = database.prepare('INSERT INTO inventory(asset_id, category, description, date) VALUES (?,?,?,?)')
+    inData.run(asset, category, description, date);
+    return true;}
+  catch(err){
+    return false;
+  }
+}
+
 //session key generator
 async function genSession (username, userid){
   let data = {

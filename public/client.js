@@ -1,4 +1,3 @@
-const { response } = require("express");
 
 function goToSignup(){
         window.location.href = window.location.origin + '/signup';
@@ -123,4 +122,34 @@ function authFetch(url, options = {}) {
         };
 
     return fetch(url, options);
+}
+async function getInv(){
+        try {await authFetch(window.location.origin + "/inventory", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'document/html'
+         }
+        })
+        .then(response => response.text())
+        .then(content => {
+        document.getElementById('content_window').setAttribute('srcdoc', content)})
+        }catch(err) {throw err;}
+}
+async function putInv(){
+        let asset = document.getElementById('asset_id').value;
+        let category = document.getElementById('category').value;
+        let description = document.getElementById('description').value;
+        let date = document.getElementById('date').value;
+        let data = {
+            asset_id : asset,
+            category : category,
+            description: description,
+            date : date
+        }
+        console.log(window.location)
+        try {await authFetch(window.location.hostname + "/inventory/update", {
+        method: 'POST',
+        body : JSON.stringify(data),
+        })
+        }catch(err) {throw err;}
 }

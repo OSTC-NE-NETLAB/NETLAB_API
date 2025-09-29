@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="menu_css.css">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <script src="/client.js"></script>
     <title>OSTC - Home</title>
 </head>
 <body>
-    <nav><div class="logo"><img src="company_logo.png" alt="company logo" class="logo"></div><button class="navbutt">Home</button><button class="navbutt">Inventory</button><button class="navbutt">Account</button><button onclick="signOut()" class="navbutt">Sign out</button></nav>
+    <nav><div class="logo"><img src="logo.png" alt="company logo" class="logo"></div><button class="navbutt" onclick="getMainContent()">Home</button><button class="navbutt" onclick="getInv()">Inventory</button><button class="navbutt">Account</button><button onclick="signOut()" class="navbutt">Sign out</button></nav>
     <iframe srcdoc="" frameborder="0" id="content_window">
     </iframe>
     <div id="footer">Made by: Samuel Masker</div>
