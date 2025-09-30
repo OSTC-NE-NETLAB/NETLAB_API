@@ -7,13 +7,17 @@
     <script src="/client.js"></script>
     <title>Document</title>
 </head>
-<body>
+<body onload="getItems()">
     <div id="insert">
         <input type="text" class="insbutt" name="asset_id" id="asset_id" placeholder="Asset Id">
         <input type="text" class="insbutt" name="category" id="category" placeholder="Category">
         <input type="text" class="insbutt" name="description" id="description" placeholder="Description">
         <input type="date" class="insbutt" name="date" id="date">
-        <input type="button" value="Insert Into Data" class="insbutt" onclick="putInv()">
+        <input type="button" value="Submit" class="insbutt" onclick="putInv()">
+        <select name="dropdown" id="dropdown" class="insbutt">
+            <option value="add">Add</option>
+            <option value="delete">Delete</option>
+        </select>
     </div>
     <div id="searchInv">
         <input type="search" class="searchIn" name="search" id="search" placeholder="search">
@@ -23,7 +27,7 @@
         <table>
             <tbody id="InvBody">
                 <tr>
-                    <th>Assest Id</th>
+                    <th>Asset Id</th>
                     <th>Category</th>
                     <th>Description</th>
                     <th>Date</th>

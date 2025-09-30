@@ -1,3 +1,4 @@
+const { response } = require("express");
 
 function goToSignup(){
         window.location.href = window.location.origin + '/signup';
@@ -37,11 +38,6 @@ async function attemptLogin(){
                                 username : data.username
                         }
                         localStorage.setItem('userdata', JSON.stringify(userdata))
-                        let session = {
-                                session : data.session.Session,
-                                sig : data.session.sig,
-                        }
-                        localStorage.setItem('session', JSON.stringify(session))
                 }catch(err){throw err}
                 goHome()
         }else{
@@ -51,30 +47,38 @@ async function attemptLogin(){
     }
 
 async function goHome(){
-        try {await authFetch(window.location.origin + "/menu", {
+        let post;
+        try {post = await fetch(window.location.origin + "/menu", {
         method: 'GET',
         headers: {
           'Content-Type': 'document/html'
          }
         })
-        .then(response => response.text())
-        .then(html => {
-        document.documentElement.innerHTML = html;})
         }catch(err) {throw err;}
-        getMainContent()
+        if(post.status == 401){
+                return 401;
+        }else{  
+                
+                document.open();
+                document.write(post.text());
+                document.close();
+                return 202;
+        }
     }
 
 async function getMainContent() {
-        try {await authFetch(window.location.origin + "/main", {
+        let post;
+        try {post = await fetch(window.location.origin + "/main", {
         method: 'GET',
         headers: {
           'Content-Type': 'document/html'
          }
         })
-        .then(response => response.text())
-        .then(content => {
-        document.getElementById('content_window').setAttribute('srcdoc', content)})
         }catch(err) {throw err;}
+
+
+        document.getElementById('content_window').setAttribute('srcdoc', post.text())
+        
         
 }
 
@@ -96,7 +100,7 @@ async function signUp(){
                 lastName : lastName,
         }
 
-        try {await authFetch(window.location.origin + "/signup", {
+        try {await fetch(window.location.origin + "/signup", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -108,23 +112,9 @@ async function signUp(){
         console.log(code)
 }
 
-function authFetch(url, options = {}) {
-        var token = localStorage.getItem('session'); 
 
-         var defaultHeaders = {
-              'Authorization': `${token}`,
-              'Content-Type': 'application/json',
-      };
-
-       options.headers = {
-       ...defaultHeaders,
-      ...options.headers,
-        };
-
-    return fetch(url, options);
-}
 async function getInv(){
-        try {await authFetch(window.location.origin + "/inventory", {
+        try {await fetch(window.location.origin + "/inventory", {
         method: 'GET',
         headers: {
           'Content-Type': 'document/html'
@@ -147,9 +137,43 @@ async function putInv(){
             date : date
         }
         console.log(window.location)
-        try {await authFetch(window.location.hostname + "/inventory/update", {
+        try {await fetch(window.location.hostname + "/inventory/update", {
         method: 'POST',
         body : JSON.stringify(data),
         })
         }catch(err) {throw err;}
+        location.reload()
+}
+async function getItems(){
+        let jsondata;
+        try {await fetch(window.location.hostname + "/inventory/items", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+         }
+        })
+        .then(response=>response.json())
+        .then(data=> jsondata = data)
+        }catch(err) {throw err;}
+        
+        for (let i = 0; i < jsondata.length; i++){
+                var tr = document.createElement('tr')
+                var asset = document.createElement('td')
+                var category = document.createElement('td')
+                var description = document.createElement('td')
+                var date = document.createElement('td')
+                tr.setAttribute('id', `item${i}`)
+
+                asset.innerHTML = jsondata[i].asset_id;
+                category.innerHTML = jsondata[i].category;
+                description.innerHTML = jsondata[i].description;
+                date.innerHTML = jsondata[i].date;
+
+                tr.appendChild(asset)
+                tr.appendChild(category)
+                tr.appendChild(description)
+                tr.appendChild(date)
+
+                document.getElementById('InvBody').appendChild(tr)
+        }
 }

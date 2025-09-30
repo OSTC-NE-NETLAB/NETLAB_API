@@ -6,6 +6,7 @@ const { DatabaseSync } = require('node:sqlite');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 
 //imported variables -- ONLY CHANGE IF YOU KNOW WHAT YOUR DOING!!!
@@ -40,6 +41,7 @@ console.log(
 
 //Starts Express -- DO NOT MOVE 
 app.use(express.json())
+app.use(cookieParser())
 
 //sets up expresses static dir -- !UNUSED VAR! -- DO NOT REMOVE
 const options = {
@@ -90,7 +92,18 @@ app.route('/')
         let getinfo = await database.prepare("SELECT userid, username, Session FROM auth WHERE Session= ?;");
         let sessioninfo = getinfo.all(Session.Session)
         
-        res.status(202).json({message: 'login successful', session: Session, username : sessioninfo[0].username, userid : sessioninfo[0].userid});
+        res.status(202)
+          .cookie('authorization', JSON.stringify(Session), { 
+            maxAge: 60 * 60 * 1000, 
+            httpOnly: true,         
+            secure: true,           
+            path: '/'               
+          })
+          .json(
+            {message: 'login successful', 
+            username : sessioninfo[0].username, 
+            userid : sessioninfo[0].userid}
+          )
         
       } else{
         res.status(401).json({message : "Bad username or password"})
@@ -138,13 +151,15 @@ app.route('/signup')
 
 //check auth middleware -- ANYTHING UNDER THIS MUST GIVE AUTH HEADERS
 app.use( async (req,res, next) => {
-  if(req.headers['authorization']){
-    let sessioninf = await JSON.parse(req.headers['authorization']);
-    try{var session = sessioninf.session;
+  if(req.cookies.authorization){
+    let sessioninf = await JSON.parse(req.cookies.authorization);
+    try{var session = sessioninf.Session;
     var auth = sessioninf.sig;}
     catch(err){
       res.status(401);
     }
+  }else{
+    res.send(401).redirect('/')
   }
   if(session && auth){
     let authed = await verifySession(session, auth)
@@ -176,9 +191,11 @@ app.route('/inventory')
     res.sendFile(path.join(__dirname + "/html/inventory.html"))
   })
 
-app.route('/inventory/items/:id')
+app.route('/inventory/items/')
   .get(async (req, res) =>{
-
+      let getItems = database.prepare("SELECT asset_id, category, description, date FROM inventory")
+      let Items = getItems.all()
+      res.send(Items)
   })
 app.route('/inventory/update')
   .post(async (req, res) =>{

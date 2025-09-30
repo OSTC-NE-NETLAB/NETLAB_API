@@ -9,6 +9,10 @@
     width: 100%;
     height: 5vh;
     font-size: 1.2vw;
+    min-height: 10px !important;
+}
+.insbutt{
+    min-height: 15px !important;
 }
 input.insbutt{
     flex: 10%;
@@ -18,8 +22,12 @@ input.searchIn{
     flex: 90%;
     font-size: 1.2vw;
 }
+#dropdown{
+    flex: 3%;
+    font-size: 1.2vw;
+}
 input.button.searchIn{
-    flex: 10%;
+    flex: 7%;
     font-size: 1.2vw;
 }
 body{
