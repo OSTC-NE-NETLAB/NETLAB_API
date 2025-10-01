@@ -3,11 +3,11 @@ const express = require('express');
 const app = express()
 const toml = require('toml');
 const { DatabaseSync } = require('node:sqlite');
-const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
+const { timeStamp } = require('console');
 
 //imported variables -- ONLY CHANGE IF YOU KNOW WHAT YOUR DOING!!!
 const database = new DatabaseSync(process.cwd()+'/main.db');
@@ -49,7 +49,29 @@ app.use(express.static(__dirname + '/public'))
  */
 
 async function AuthenticateUser(username, password) {
-  database.prepare("SELECT userid, username, password, FROM auth WHERE username=")
+  let Auth = database.prepare("SELECT userid, username, password, FROM auth WHERE username= ?")
+  let AuthData = await Auth.all(username)
+  if(AuthData.username && AuthData.password){
+    let AuthCheck = bcrypt.compare(password, AuthData.password)
+    return AuthCheck;
+  }else{  
+    return false;
+  }
+}
+async function getSession(username) {
+  let Auth = database.prepare("SELECT userid, username FROM auth WHERE username = ?")
+  let AuthData = Auth.all(username);
+  if(AuthData.username && AuthData.userid){
+    let session = {
+      username : AuthData.username,
+      userid : AuthData.password,
+      date : Math.floor(new Date(timeStamp).getMinutes())
+    }
+    return bcrypt.hash(JSON.stringify(session), 12);
+  }else{
+    return false;
+  }
+
 }
 
 
@@ -65,6 +87,28 @@ async function AuthenticateUser(username, password) {
 app.route('/login')
     .get((req, res) => {
       res.status(200).sendFile(path.join(__dirname + '/html/login.html'))
+    })
+    .post((req, res) => {
+      let username = req.body.username;
+      let password = req.body.password;
+      if(username && password){
+        let checkAuth = AuthenticateUser(username, password);
+        if(checkAuth){
+          let session = getSession(username)
+          if(session){
+              res.send(201).cookie("session", session, {
+                httpOnly : true,
+                expires : (Date.now() + 60 * 60 * 1000)
+              })
+          }else{
+            res.status(500).json({message : "There was a problem proccessing the request"})
+          }
+        }else{
+          res.status(401).json({message : "Invalid username or password"})
+        }
+      }else{
+        res.status(400).json({message : "Malformed Request"})
+      }
     })
 
 
