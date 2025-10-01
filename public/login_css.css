@@ -23,7 +23,7 @@ body{
     color: rgba(102, 102, 102, 0.582);
     
 }
-button{
+.button{
     width: 10vw;
     flex: 50%;
     border-radius: 0%;
