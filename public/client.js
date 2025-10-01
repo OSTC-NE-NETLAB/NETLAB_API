@@ -1,20 +1,53 @@
 
-async function signin() {
+
+async function signIn() {
    let username =  document.getElementById('username').value
-   let password = document.getElementById('password').value;
+   let password = document.getElementById('password').value
    let data = {
     username : username,
     password : password,
    }
+   let url = window.location.origin + '/Login'
    try{
-    let response = await fetch('/login', {
+    await fetch(url, {
         method : 'POST',
-        body: data,
+        headers : {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => {
+        if(response.ok){
+            console.log('wow')
+        }
     })
    }catch(err){
     throw err
    }
-   if(response.status == 201){
-    document.location.href = document.location.href + '/'
+}
+
+async function signUp() {
+   let username =  document.getElementById('username').value
+   let password = document.getElementById('password').value
+   let data = {
+    username : username,
+    password : password,
+   }
+   let url = window.location.origin + '/Login'
+   try{
+    await fetch(url, {
+        method : 'POST',
+        headers : {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => {
+        if(response.ok){
+            console.log('wow')
+        }
+    })
+   }catch(err){
+    throw err
    }
 }
