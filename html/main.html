@@ -5,15 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/main_css.css">
+    <link rel="stylesheet" href="menu_css.css">
     <title>Document</title>
 </head>
 <body>
+     <nav><div class="logo"><img src="logo.png" alt="company logo" class="logo"></div>
+        <button class="navbutt" onclick="getMainContent()">Home</button>
+        <a href="/inventory">Inventory</a>
+        <button class="navbutt">Account</button>
+        <a href="/signout">sign out</a> 
+    </nav>
     <h1>Welcome to OSS admin panel</h1>
     <main>
         <h2>Recent Updates</h2>
         <p>Added password and User management</p>
         <p>Terms updates</p>
         <p>removed bugs</p>
+        
     </main>
+    <div id="footer">Made by: Samuel Masker</div>
 </body>
 </html>

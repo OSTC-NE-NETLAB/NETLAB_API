@@ -18,9 +18,13 @@ async function signIn() {
     })
     .then(response => {
         if(response.ok){
-            console.log('wow')
+            window.location.href = window.location.origin + '/home'
+        }else{  
+            let error = response.json()
+            document.getElementById('error').innerHTML = error.message;
         }
     })
+    
    }catch(err){
     throw err
    }
@@ -29,11 +33,15 @@ async function signIn() {
 async function signUp() {
    let username =  document.getElementById('username').value
    let password = document.getElementById('password').value
+   let first = document.getElementById('password').value
+   let last = document.getElementById('password').value
    let data = {
     username : username,
     password : password,
+    first : first,
+    last : last,
    }
-   let url = window.location.origin + '/Login'
+   let url = window.location.origin + '/signup'
    try{
     await fetch(url, {
         method : 'POST',

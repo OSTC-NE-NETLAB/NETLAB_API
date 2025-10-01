@@ -1,8 +1,4 @@
-body{
-    margin: 0%;
-    height: fit-content;
-    background-color: #009213;
-}
+
 nav{
     background-color: #009213;
     display: flex;
@@ -16,7 +12,7 @@ div.logo{
 img.logo{
     height: 100%;
 }
-button.navbutt{
+a.navbutt{
     flex: 10%;
     background-color: #009213;
     border: none;
@@ -27,7 +23,7 @@ button.navbutt{
     color: white;
     transition: ease .3s;
 }
-button.navbutt:hover{
+a.navbutt:hover{
     background-color: white;
     color: black;
     transition: ease .3s;
