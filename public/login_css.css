@@ -23,7 +23,7 @@ body{
     color: rgba(102, 102, 102, 0.582);
     
 }
-.button{
+button.button{
     width: 10vw;
     flex: 50%;
     border-radius: 0%;
@@ -33,7 +33,7 @@ body{
     font-size: 1.5vw;
     transition: all ease 0.3s;
 }
-button:hover{
+.button:hover{
     background-color: white;
     color: black;
     transition: all ease 0.3s;
