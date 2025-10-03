@@ -1,14 +1,31 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="/inventory_css.css">
+    <link rel="stylesheet" href="menu_css.css">
+    <script src="/client.js"></script>
+    <title>OSTC - Inventory</title>
+</head>
+<body onload="getInventory()">
+    <nav><div class="logo"><img src="logo.png" alt="company logo" class="logo"></div>
+        <a href="/home" class="navbutt"><button class="navbutt">Home</button></a>
+        <a href="/inventory" class="navbutt"><button class="navbutt">inventory</button></a>
+        <a href="" class="navbutt"><button class="navbutt">Account</button></a>
+        <a href="/signout" class="navbutt"><button class="navbutt">Sign Out</button></a> 
+    </nav>
     <div id="insert">
-        <input type="text" class="insbutt" name="asset_id" id="asset_id" placeholder="Asset Id">
+        <input type="number" class="insbutt" name="asset_id" id="asset_id" placeholder="Asset Id">
+        <input type="text" class="insbutt" name="name" id="name" placeholder="name">
         <input type="text" class="insbutt" name="category" id="category" placeholder="Category">
         <input type="text" class="insbutt" name="description" id="description" placeholder="Description">
         <input type="date" class="insbutt" name="date" id="date">
-        <input type="button" value="Submit" class="insbutt" onclick="putInv()">
+        <input type="button" value="Submit" class="insbutt" onclick="PutOrQuery()">
         <select name="dropdown" id="dropdown" class="insbutt">
-            <option value="add">Add</option>
-            <option value="delete">Delete</option>
+            <option value="0">Add</option>
+            <option value="1">Delete</option>
         </select>
     </div>
     <div id="searchInv">
@@ -20,6 +37,7 @@
             <tbody id="InvBody">
                 <tr>
                     <th>Asset Id</th>
+                    <th>Name</th>
                     <th>Category</th>
                     <th>Description</th>
                     <th>Date</th>
@@ -27,3 +45,8 @@
             </tbody>
         </table>
     </div>
+    <div id="footer">Made by: Samuel Masker</div>
+</body>
+</html>
+
+    

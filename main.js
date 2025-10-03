@@ -99,6 +99,45 @@ async function checkSession(session) {
       return false
     }
 }
+async function getInventory(){
+  let getInventory = database.prepare("SELECT asset_id, name, category, description, date FROM inventory ORDER BY asset_id")
+  let inventory = await getInventory.all()
+  return inventory;
+}
+async function putInventory(asset_id, name, category, desc, date){
+  let getInventory = database.prepare("SELECT asset_id FROM inventory")
+  let inventory = await getInventory.all()
+  if(asset_id in inventory){
+    return false
+  }else{
+    let putInventory = database.prepare("INSERT INTO inventory(asset_id, name, category, description, date) VALUES (?,?,?,?,?)")
+    try{
+      putInventory.run(asset_id, name, category, desc, date);
+      return true
+    }catch(err){
+      console.log(err)
+      return false
+    }
+  }
+  
+}
+async function removeInventory(asset_id){
+  try{
+    let query = database.prepare("SELECT asset_id FROM inventory WHERE asset_id =?")
+    let check = query.all(asset_id)
+    if(check.length == 1){
+      let removal = database.prepare("DELETE FROM inventory WHERE asset_id = ?")
+      removal.run(asset_id)
+      return true
+    }else{
+      return false
+    }
+  }catch(err){
+    console.log(err)
+    return false
+  }
+}
+
 
 
 
@@ -184,6 +223,40 @@ app.route('/home')
 app.route('/inventory')
   .get((req, res) => {
     res.sendFile(path.join(__dirname + '/html/inventory.html'))
+  })
+  .post(async (req, res) => {
+    let inventory = await getInventory()
+    res.status(201).json(inventory);
+  })
+  .put(async (req, res) => {
+    if(!req.body.remove && req.body.remove != undefined){ 
+      if(req.body.asset_id && req.body.name && req.body.category && req.body.description && req.body.date){
+        let asset_id = req.body.asset_id;
+        let name = req.body.name
+        let category = req.body.category
+        let desc = req.body.description
+        let date = req.body.date
+        let status = await putInventory(asset_id, name, category, desc, date)
+        if(status){
+          res.status(202).json({message : "Inventory Successfully Updated"})
+        }else{
+          res.sendStatus(500)
+        }
+      }else{
+        res.status(400).json({message : "Malformed Request"})
+      }
+    }else{
+      if(req.body.asset_id){
+        let check = await removeInventory(req.body.asset_id)
+        if(check){
+          res.status(202).json({message : "Removed Successfully"})
+        }else{
+          res.status(400).json({message : "No Matching Id"})
+        }
+      }else{
+        res.status(400).json({message : "Malformed Request"})
+      }
+    }
   })
 
 app.route('/inventory/:id')

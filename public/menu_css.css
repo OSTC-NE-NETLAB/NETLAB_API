@@ -1,4 +1,7 @@
-
+body{
+    margin: 0%;
+    height: 100vh;
+}
 nav{
     background-color: #009213;
     display: flex;
@@ -14,6 +17,10 @@ img.logo{
 }
 a.navbutt{
     flex: 10%;
+}
+button.navbutt{
+    height: 100%;
+    width: 100%;
     background-color: #009213;
     border: none;
     border-left: 1px solid black;
@@ -23,16 +30,14 @@ a.navbutt{
     color: white;
     transition: ease .3s;
 }
-a.navbutt:hover{
+button.navbutt:hover{
     background-color: white;
     color: black;
     transition: ease .3s;
 }
-iframe{
-    width: 100%;
-    height: 89vh;
-}
 #footer{
+    position: absolute;
+    bottom: 0%;
     width: 100%;
     text-align: center;
     color: white;
