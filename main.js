@@ -107,7 +107,7 @@ async function getInventory(){
 async function putInventory(asset_id, name, category, desc, date){
   let getInventory = database.prepare("SELECT asset_id FROM inventory")
   let inventory = await getInventory.all()
-  if(asset_id in inventory){
+  if(inventory.length > 0){
     return false
   }else{
     let putInventory = database.prepare("INSERT INTO inventory(asset_id, name, category, description, date) VALUES (?,?,?,?,?)")
@@ -261,6 +261,10 @@ app.route('/inventory')
 
 app.route('/inventory/:id')
 
+app.route('/account')
+  .get((req, res) => {
+    res.status(200).sendFile(path.join(__dirname + '/html/account.html'))
+  })
 app.listen(port, () =>{
   console.log(`NETLAB API IS LISTEN ON ${port}`)
 })
