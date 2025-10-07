@@ -20,3 +20,7 @@ h4.userDat{
 pre.userDat{
     flex: 50%;
 }
+button.changeButton{
+    height: 50%;
+    align-self: center;
+}

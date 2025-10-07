@@ -73,6 +73,7 @@ async function makeNewUser(username, password, first, last) {
   
 }
 async function getSession(username) {
+  try{
   let Auth = database.prepare("SELECT userid, username FROM auth WHERE username = ?")
   let AuthData = await Auth.all(Buffer.from(username).toString('base64'));
   if(AuthData[0].username && AuthData[0].userid){
@@ -81,19 +82,24 @@ async function getSession(username) {
       userid : AuthData.password,
       date : Math.floor(new Date())
     }
-    let NewSession = bcrypt.hash(JSON.stringify(session), 12);
+    let NewSession = await bcrypt.hash(JSON.stringify(session), 12);
     let SetSession = database.prepare("UPDATE auth SET Session = ? WHERE username = ?")
     await SetSession.run(NewSession, username)
     return NewSession
   }else{
     return false;
+  }}catch(err){
+    console.log(err)
+    return false
   }
 
 }
 async function checkSession(session) {
     let getAuth = database.prepare("SELECT userid FROM auth WHERE Session=?")
     let auth = getAuth.all(session)
-    if(auth.length = 1){
+    let check = auth.length
+    console.log(check)
+    if(check > 0){
       return true
     }else{
       return false
@@ -230,7 +236,7 @@ app.route('/signup')
 app.use( async (req, res, next) =>{
   if(req.cookies.session){
     let auth  = checkSession(req.cookies.session);
-    if(auth){next()}
+    if(await auth){next()}
   }else{
     res.status(401).redirect('/login')
   }
@@ -291,8 +297,7 @@ app.route('/account')
     res.status(200).sendFile(path.join(__dirname + '/html/account.html'))
   })
   .post(async (req, res) => {
-    let session = req.cookies.session;
-    let userinf = await getUserData(session)
+    let userinf = await getUserData(req.cookies.session)
     if(userinf){
       res.status(200).json(userinf)
     }
