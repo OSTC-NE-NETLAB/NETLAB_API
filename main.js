@@ -138,7 +138,32 @@ async function removeInventory(asset_id){
   }
 }
 
-
+async function getUserData(session){
+  console.log(session)
+  try{
+    let user = {
+      id        :   Number,
+      username  :   String,
+      first     :   String,
+      last      :   String,
+      made      :   String,
+    };
+    let query = database.prepare("SELECT userid, username FROM auth WHERE Session=?")
+    let quser = await query.all(session)
+    console.log(quser)
+    user.id = quser[0].userid;
+    user.username = quser[0].username;
+    query = database.prepare("SELECT first, last, made WHERE userid =")
+    quser = await query.all(user.id)
+    user.first = quser[0].first;
+    user.last = quser[0].last;
+    user.made = quser[0].made;
+    return user
+  }catch(err){
+    console.log(err)
+    return false
+  }
+}
 
 
 
@@ -265,6 +290,19 @@ app.route('/account')
   .get((req, res) => {
     res.status(200).sendFile(path.join(__dirname + '/html/account.html'))
   })
+  .post(async (req, res) => {
+    let session = req.cookies.session;
+    let userinf = await getUserData(session)
+    if(userinf){
+      res.status(200).json(userinf)
+    }
+    else{
+      res.status(500).json({message : "Internal Error, Try again later"})
+    }
+  })
+
+
+
 app.listen(port, () =>{
   console.log(`NETLAB API IS LISTEN ON ${port}`)
 })

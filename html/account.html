@@ -6,17 +6,25 @@
     <title>OSTC - Account</title>
     <link rel="shortcut icon" href="logo.png" type="image/x-icon">
     <link rel="stylesheet" href="menu_css.css">
-    <link rel="stylesheet" href="account.css">
+    <link rel="stylesheet" href="account_css.css">
     <script src="/client.js"></script>
 </head>
-<body>
+<body onload="getUserData()">
      <nav><div class="logo"><img src="logo.png" alt="company logo" class="logo"></div>
         <a href="/home" class="navbutt"><button class="navbutt">Home</button></a>
         <a href="/inventory" class="navbutt"><button class="navbutt">inventory</button></a>
         <a href="" class="navbutt"><button class="navbutt">Account</button></a>
         <a href="/signout" class="navbutt"><button class="navbutt">Sign Out</button></a> 
     </nav>
-    
+    <main>
+        <div id="userInf">
+            <div class="username userDat"><h4 class="userDat">Username: </h4><pre class="userDat"id="Tusername"></pre></div>
+            <div class="userfirstlast userDat"><h4 class="userDat">Name: </h4><pre class="userDat" id="firstlast"></pre></div>
+            <div class="useremail userDat"><h4 class="userDat">Email: </h4><pre class="userDat" id="Tusername"></pre></div>
+            <div class="userMade userDat"><h4 class="userDat">Made: </h4><pre class="userDat" id="Tdate"></pre></div>
+            <div class="userPass userDat"><h4 class="userDat">Change Password: </h4> <pre class="userDat" id="Tpass"></pre></div>
+        </div>
+    </main>
     <div id="footer">Made by: Samuel Masker</div>
 </body>
 </html>

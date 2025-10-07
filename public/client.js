@@ -164,3 +164,22 @@ async function removeInventory(){
         throw err
     }
 }
+async function getUserData(){
+    try{
+        let response = await fetch('/account', {
+            method: 'POST',
+            headers : {
+                "Content-Type" : "application/json",
+            }
+        })
+        if(response.ok){
+
+        }else{
+            console.log(`RESPONSE CODE : ${response.status}`)
+            alert(`HTTP ERROR CODE: ${response.status}`)
+        }
+    }catch(err){
+        console.log("HTTP ERROR NO NETWORK")
+        throw err
+    }
+}

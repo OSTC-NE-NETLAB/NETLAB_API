@@ -1,0 +1,22 @@
+body{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+#userInf{
+    display: flex;
+    height: 50%;
+    width: 50%;
+    flex-direction: column;
+    position: relative;
+    top: 50%;
+    left: 25%;
+}
+div.userDat{
+    text-align: right;
+    display: flex;
+}
+h4.userDat{
+    flex: 50%;
+}
+pre.userDat{
+    flex: 50%;
+}
